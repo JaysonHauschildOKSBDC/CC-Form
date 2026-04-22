@@ -2,3 +2,4 @@ backend/node_modules/
 backend/.env
 lists.json
 cc-secure-ssubscriber-plugin.php
+backend/newsletter-map.json
