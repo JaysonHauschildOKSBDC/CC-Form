@@ -77,8 +77,76 @@
       ".ccf-consent input{margin-right:8px}" +
       ".ccf-message{margin:8px 0 12px;font-size:14px}" +
       ".ccf-message.error{color:#b42318}" +
-      ".ccf-message.success{color:#0a7a2f}";
+      ".ccf-message.success{color:#0a7a2f}" +
+      ".ccf-toast{position:fixed;max-width:360px;padding:12px 14px;border-radius:14px;background:rgba(196,71,71,.9);color:#fff;font-size:14px;line-height:1.4;box-shadow:0 8px 24px rgba(16,24,40,.22);opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:2147483647}" +
+      ".ccf-toast.show{opacity:1;transform:translateY(0)}";
     document.head.appendChild(style);
+  }
+
+  function getOrCreateToast() {
+    var toast = document.querySelector(".ccf-toast");
+    if (toast) return toast;
+
+    toast = document.createElement("div");
+    toast.className = "ccf-toast";
+    toast.setAttribute("role", "alert");
+    toast.setAttribute("aria-live", "assertive");
+    document.body.appendChild(toast);
+    return toast;
+  }
+
+  function positionToastNearForm(toast, root) {
+    if (!toast || !root) return;
+
+    var widget = root.querySelector(".ccf-widget") || root;
+    var rect = widget.getBoundingClientRect();
+    var gap = 12;
+    var desiredLeft = rect.right + gap;
+    var desiredTop = rect.top;
+
+    toast.style.left = desiredLeft + "px";
+    toast.style.top = desiredTop + "px";
+    toast.style.right = "auto";
+    toast.style.bottom = "auto";
+
+    var toastRect = toast.getBoundingClientRect();
+    var rightEdge = desiredLeft + toastRect.width;
+
+    if (rightEdge > window.innerWidth - 12) {
+      toast.style.left = Math.max(12, rect.left) + "px";
+      toast.style.top = Math.min(window.innerHeight - toastRect.height - 12, rect.bottom + gap) + "px";
+    }
+  }
+
+  function showToast(text, root) {
+    var toast = getOrCreateToast();
+    toast.textContent = text;
+    positionToastNearForm(toast, root);
+    toast.classList.add("show");
+  }
+
+  function isConnectionFailure(err) {
+    if (!err) return false;
+    var message = String(err && err.message ? err.message : err).toLowerCase();
+    return (
+      err.name === "TypeError" ||
+      /failed to fetch|networkerror|network request failed|load failed|fetch failed|offline|timeout|ecconnrefused|enotfound/.test(message)
+    );
+  }
+
+  function setFormOffline(root, messageEl) {
+    var form = root.querySelector(".ccf-form");
+    if (form) {
+      Array.from(form.elements).forEach(function (el) {
+        el.disabled = true;
+      });
+    }
+
+    var connectButton = root.querySelector(".ccf-connect");
+    if (connectButton) connectButton.disabled = true;
+
+    setMessage(messageEl, "The form is offline right now. Please try again later.", "error");
+    showToast("The form is offline right now. Please try again later.", root);
   }
 
   function createRoot() {
@@ -411,7 +479,7 @@
   function renderWidget(root) {
     root.innerHTML =
       '<div class="ccf-widget">' +
-      '<h3 class="ccf-title">Subscribe</h3>' +
+      '<h2 class="ccf-title">Email Updates</h2>' +
       '<div class="ccf-message"></div>' +
       (useBackend ? "" : '<button type="button" class="ccf-button ccf-connect">Connect to Constant Contact</button>') +
       '<form class="ccf-form">' +
@@ -463,6 +531,10 @@
           form.reset();
         })
         .catch(function (err) {
+          if (isConnectionFailure(err)) {
+            setFormOffline(root, message);
+            return;
+          }
           setMessage(message, "Subscription failed: " + err.message, "error");
         });
     });
@@ -481,7 +553,11 @@
               var newsletters = Array.isArray(data.newsletters) ? data.newsletters : [];
               renderNewsletterCheckboxes(root, newsletters);
             })
-            .catch(function () {
+            .catch(function (err) {
+              if (isConnectionFailure(err)) {
+                setFormOffline(root, message);
+                return;
+              }
               setMessage(message, "Could not load newsletter options.", "error");
             });
         }
