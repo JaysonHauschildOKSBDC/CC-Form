@@ -15,7 +15,10 @@
                 <input class="ccf-field" type="text" name="last_name" placeholder="Last Name" required>
                 <input class="ccf-field" type="email" name="email" placeholder="Email" required>
                 <input class="ccf-field" type="text" name="company_name" placeholder="Business/Organization (optional)">
-                <div class="ccf-list-wrap"></div>
+                <div class="ccf-list-wrap">
+                    <label class="ccf-list-option"><input type="checkbox" name="newsletter_keys" value="newsletter"> Newsletter</label>
+                    <label class="ccf-list-option"><input type="checkbox" name="newsletter_keys" value="workshops"> Workshops</label>
+                </div>
                 <label class="ccf-consent"><input name="consent" type="checkbox" required>I agree to receive email updates.</label>
                 <button class="ccf-button" type="submit">Subscribe</button>
             </form>
@@ -23,8 +26,12 @@
 
         <script>
             window.CC_FORM_CONFIG = {
-                backendEndpoint: "http://127.0.0.1:3001/cc/v1",
+                backendEndpoint: "https://tritheistical-unsynchronous-luana.ngrok-free.dev/cc/v1",
                 showListSelector: true,
+                newsletters: [
+                    { key: "newsletter", label: "Newsletter" },
+                    { key: "workshops", label: "Workshops" }
+                ],
                 target: "#cc-subscribe-widget"
             };
         </script>

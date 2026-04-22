@@ -380,38 +380,6 @@
     });
   }
 
-  function renderNewsletterCheckboxes(root, newsletters) {
-    var container = root.querySelector(".ccf-list-wrap");
-    if (!container) return;
-    container.innerHTML = "";
-
-    newsletters.forEach(function (item) {
-      var label = document.createElement("label");
-      label.className = "ccf-list-option";
-
-      var checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.name = "newsletter_keys";
-      checkbox.value = item.key;
-
-      label.appendChild(checkbox);
-      label.appendChild(document.createTextNode(" " + item.label));
-      container.appendChild(label);
-    });
-  }
-
-  function fetchBackendNewsletters() {
-    return fetch(config.backendEndpoint.replace(/\/$/, "") + "/newsletters", {
-      method: "GET",
-      headers: {
-        Accept: "application/json"
-      }
-    }).then(function (res) {
-      if (!res.ok) throw new Error("Failed to load newsletters.");
-      return res.json();
-    });
-  }
-
   function submitSignup(formData, root) {
     if (useBackend) {
       var newsletterKeys = getSelectedNewsletterKeys(root);
@@ -542,24 +510,6 @@
     var state = params.get("state");
 
     if (useBackend) {
-      if (config.showListSelector) {
-        if (Array.isArray(config.newsletters) && config.newsletters.length) {
-          renderNewsletterCheckboxes(root, config.newsletters);
-        } else {
-          fetchBackendNewsletters()
-            .then(function (data) {
-              var newsletters = Array.isArray(data.newsletters) ? data.newsletters : [];
-              renderNewsletterCheckboxes(root, newsletters);
-            })
-            .catch(function (err) {
-              if (isConnectionFailure(err)) {
-                setFormOffline(root, message);
-                return;
-              }
-              setMessage(message, "Could not load newsletter options.", "error");
-            });
-        }
-      }
       return;
     }
 
