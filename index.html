@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CC Form</title>
+        <style>
+            #signup-form > * {
+                display: block;
+                margin-bottom: 0.75rem;
+                align-items: center;
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            window.CC_FORM_CONFIG = {
+                backendEndpoint: "http://localhost:3001/cc/v1",
+                showListSelector: true
+            };
+        </script>
+        <script src="form.js"></script>
+    </body>
+</html>
