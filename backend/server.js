@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -20,6 +21,8 @@ const adminApiKey = process.env.ADMIN_API_KEY || "";
 const frontendOrigin = process.env.FRONTEND_ORIGIN || "*";
 const tokenStorePath = path.resolve(process.cwd(), process.env.TOKEN_STORE_PATH || "./token-store.json");
 const newsletterMapPath = path.resolve(process.cwd(), "./newsletter-map.json");
+const serverDirPath = path.dirname(fileURLToPath(import.meta.url));
+const publicFormScriptPath = path.resolve(serverDirPath, "../form.js");
 
 function normalizeOrigin(origin) {
   if (!origin) return "";
@@ -76,6 +79,15 @@ app.use(
   })
 );
 app.use(express.json());
+
+app.get("/cc/v1/form.js", (_req, res) => {
+  if (!fs.existsSync(publicFormScriptPath)) {
+    return res.status(404).type("text/plain").send("form.js not found");
+  }
+
+  res.type("application/javascript");
+  return res.sendFile(publicFormScriptPath);
+});
 
 function readJsonFile(filePath, fallback) {
   try {
