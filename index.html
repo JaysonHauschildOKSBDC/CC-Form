@@ -4,21 +4,30 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>CC Form</title>
-        <style>
-            #signup-form > * {
-                display: block;
-                margin-bottom: 0.75rem;
-                align-items: center;
-            }
-        </style>
     </head>
     <body>
+        <div id="cc-subscribe-widget" class="ccf-widget">
+            <h2 class="ccf-title">Email Updates</h2>
+            <div class="ccf-message"></div>
+            <button type="button" class="ccf-button ccf-connect">Connect to Constant Contact</button>
+            <form class="ccf-form">
+                <input class="ccf-field" type="text" name="first_name" placeholder="First Name" required>
+                <input class="ccf-field" type="text" name="last_name" placeholder="Last Name" required>
+                <input class="ccf-field" type="email" name="email" placeholder="Email" required>
+                <input class="ccf-field" type="text" name="company_name" placeholder="Business/Organization (optional)">
+                <div class="ccf-list-wrap"></div>
+                <label class="ccf-consent"><input name="consent" type="checkbox" required>I agree to receive email updates.</label>
+                <button class="ccf-button" type="submit">Subscribe</button>
+            </form>
+        </div>
+
         <script>
             window.CC_FORM_CONFIG = {
                 backendEndpoint: "http://127.0.0.1:3001/cc/v1",
-                showListSelector: true
+                showListSelector: true,
+                target: "#cc-subscribe-widget"
             };
         </script>
-        <script src="form.js"></script>
+        <script src="https://tritheistical-unsynchronous-luana.ngrok-free.dev/cc/v1/form.js"></script>
     </body>
 </html>

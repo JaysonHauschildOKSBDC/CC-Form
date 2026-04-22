@@ -149,19 +149,17 @@
     showToast("The form is offline right now. Please try again later.", root);
   }
 
-  function createRoot() {
+  function getRoot() {
     if (config.target) {
       var targetNode = document.querySelector(config.target);
       if (targetNode) return targetNode;
     }
 
-    var root = document.createElement("div");
-    if (scriptEl && scriptEl.parentNode) {
-      scriptEl.parentNode.insertBefore(root, scriptEl.nextSibling);
-    } else {
-      document.body.appendChild(root);
+    if (scriptEl && scriptEl.previousElementSibling && scriptEl.previousElementSibling.classList.contains("ccf-widget")) {
+      return scriptEl.previousElementSibling;
     }
-    return root;
+
+    return document.querySelector(".ccf-widget");
   }
 
   function getAccessToken() {
@@ -476,32 +474,32 @@
     });
   }
 
-  function renderWidget(root) {
-    root.innerHTML =
-      '<div class="ccf-widget">' +
-      '<h2 class="ccf-title">Email Updates</h2>' +
-      '<div class="ccf-message"></div>' +
-      (useBackend ? "" : '<button type="button" class="ccf-button ccf-connect">Connect to Constant Contact</button>') +
-      '<form class="ccf-form">' +
-      '<input class="ccf-field" type="text" name="first_name" placeholder="First Name" required>' +
-      '<input class="ccf-field" type="text" name="last_name" placeholder="Last Name" required>' +
-      '<input class="ccf-field" type="email" name="email" placeholder="Email" required>' +
-      '<input class="ccf-field" type="text" name="company_name" placeholder="Business/Organization (optional)">' +
-      (config.showListSelector ? '<div class="ccf-list-wrap"></div>' : "") +
-      '<label class="ccf-consent"><input name="consent" type="checkbox" required>I agree to receive email updates.</label>' +
-      '<button class="ccf-button" type="submit">Subscribe</button>' +
-      "</form>" +
-      "</div>";
-  }
-
   function init() {
     injectStyles();
-    var root = createRoot();
-    renderWidget(root);
+    var root = getRoot();
+
+    if (!root) {
+      console.error("CC form markup not found. Add a .ccf-widget element to the page or set CC_FORM_CONFIG.target.");
+      return;
+    }
 
     var connectButton = root.querySelector(".ccf-connect");
     var form = root.querySelector(".ccf-form");
     var message = root.querySelector(".ccf-message");
+
+    if (!form || !message) {
+      console.error("CC form markup is missing required .ccf-form or .ccf-message elements.");
+      return;
+    }
+
+    if (connectButton) {
+      connectButton.style.display = useBackend ? "none" : "";
+    }
+
+    var listWrap = root.querySelector(".ccf-list-wrap");
+    if (listWrap) {
+      listWrap.style.display = config.showListSelector ? "block" : "none";
+    }
 
     if (!useBackend && !config.clientId) {
       setMessage(message, "Set data-client-id in the script tag.", "error");
